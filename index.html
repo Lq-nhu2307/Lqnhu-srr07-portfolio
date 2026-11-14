@@ -1373,8 +1373,8 @@
   <!-- Lightbox phóng to ảnh hoặc video -->
   <div class="lightbox-modal" id="lightboxModal" onclick="closeLightbox(event)">
     <button class="lightbox-close-btn" onclick="closeLightbox(null)" title="Đóng"><i class="fa-solid fa-xmark"></i></button>
-    <img id="lightboxImg" alt="Preview" decoding="async" style="display: block;">
-    <video id="lightboxVideo" controls="" playsinline="" webkit-playsinline="" preload="metadata" style="display:none;"></video>
+    <img id="lightboxImg" src="" alt="Preview" decoding="async" style="display:none;">
+    <video id="lightboxVideo" src="" controls="" playsinline="" webkit-playsinline="" preload="metadata" style="display:none;"></video>
   </div>
 
   <!-- ================= CÁC PHẦN DÀNH RIÊNG CHO CHỦ WEB (TỰ ĐỘNG XÓA SẠCH KHI XUẤT BẢN GITHUB) ================= -->
@@ -1387,7 +1387,7 @@
   <!-- THANH CÔNG CỤ CHỦ WEB KÈM DÒNG "✨Chế độ chủ web✨" VÀ 5 NÚT TÍNH NĂNG -->
   
 
-  <!-- Script dành cho khách xem (Tích hợp trình giữ nguyên xuống dòng 100% + Mở tab mới XEM TRỰC TIẾP không bắt tải về) -->
+  <!-- Script dành cho khách xem (Phân nhánh: Điện thoại hiện pop-up View/Download mặc định, PC mở tab mới xem trực tiếp không đòi tải) -->
   <script id="viewerScript">
     let activeBlobUrl = null;
 
@@ -1396,7 +1396,6 @@
       if (!el) return "";
       const clone = el.cloneNode(true);
 
-      // 1. Khôi phục các thẻ <a> về lại đường link gốc
       clone.querySelectorAll("a").forEach((a) => {
         if (a.closest(".contacts-icons-row")) return;
         const href = a.getAttribute("data-raw-url") || a.getAttribute("href") || "";
@@ -1409,12 +1408,10 @@
         }
       });
 
-      // 2. Chuyển mọi thẻ <br> thành ký tự xuống dòng \n
       clone.querySelectorAll("br").forEach((br) => {
         br.replaceWith(document.createTextNode("\n"));
       });
 
-      // 3. Chuyển các thẻ khối (<div>, <p>, <li>) do phím Enter tạo ra thành ký tự xuống dòng \n
       clone.querySelectorAll("div, p, li").forEach((block) => {
         if (block.previousSibling) {
           block.parentNode.insertBefore(document.createTextNode("\n"), block);
@@ -1443,9 +1440,22 @@
       });
     }
 
-    // HÀM MỞ TAB MỚI XEM TRỰC TIẾP (KHÔNG BAO GIỜ BẮT DOWNLOAD TRÊN PC LẪN ĐIỆN THOẠI)
+    // HÀM XỬ LÝ KHI BẤM NÚT [Xem]:
+    // - Trên Điện thoại: Giữ nguyên hành vi mặc định của trình duyệt (hiện pop-up View/Download của trình duyệt)
+    // - Trên PC: Nhảy sang tab mới để phát video trực tiếp, không bắt tải về
     function handleSmartViewClick(event, anchorEl) {
       event.stopPropagation();
+
+      // Kiểm tra nếu là thiết bị di động (Điện thoại / iPad) -> Mở link gốc mặc định để trình duyệt hiện pop-up View/Download như code cũ
+      const isMobileDevice =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+        (navigator.maxTouchPoints && navigator.maxTouchPoints > 1 && /Macintosh/i.test(navigator.userAgent));
+
+      if (isMobileDevice) {
+        return true;
+      }
+
+      // Nếu là máy tính (PC / Laptop) -> Áp dụng cơ chế mở tab mới xem trực tiếp không đòi tải về
       const rawUrl = anchorEl.getAttribute("data-raw-url") || anchorEl.getAttribute("href") || "";
       if (!rawUrl) return true;
 
@@ -1532,7 +1542,6 @@
       rootEl.querySelectorAll(".product-desc, .profile-list .editable-text, .contact-fill-line .editable-text").forEach((el) => {
         if (el.getAttribute("contenteditable") === "true") return;
 
-        // Đọc văn bản kèm đầy đủ dấu xuống dòng \n ngay cả khi phần tử đang ẩn
         const rawText = extractTextPreservingLineBreaks(el);
         if (!rawText) return;
 
@@ -1553,12 +1562,10 @@
           return `<a href="${href}" data-raw-url="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="desc-hyperlink" onclick="return handleSmartViewClick(event, this)">Xem</a>${trailing}`;
         });
 
-        // Chuyển mọi ký tự xuống dòng \n thành thẻ <br> tường minh để không bao giờ bị dính chữ
         el.innerHTML = withLinks.replace(/\n/g, "<br>");
       });
     }
 
-    // Khi Chủ Web mở khóa chỉnh sửa, trả nút [Xem] về lại URL gốc và giữ nguyên thẻ <br> xuống dòng
     function unlinkifyForEditing(rootEl = document) {
       cleanUnwantedTelPrefixes(rootEl);
       rootEl.querySelectorAll(".product-desc, .profile-list .editable-text, .contact-fill-line .editable-text").forEach((el) => {
