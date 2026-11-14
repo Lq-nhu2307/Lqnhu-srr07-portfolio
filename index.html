@@ -498,7 +498,7 @@
       pointer-events: none !important;
     }
 
-    /* ================= GALLERY GROUPS & CHẾ ĐỘ CHỌN ẢNH ĐỂ SIÊU NÉN ================= */
+    /* ================= GALLERY GROUPS (KHUNG ẢNH TỰ KHỚP 100% TỈ LỆ KÍCH THƯỚC ẢNH GỐC, KHÔNG CẮT XÉN) ================= */
     .gallery-container {
       display: flex;
       flex-direction: column;
@@ -518,15 +518,21 @@
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 12px;
       margin-bottom: 12px;
+      align-items: start;
     }
 
+    /* Khung ảnh tự động ôm khít theo đúng tỉ lệ kích thước thật của từng bức ảnh/video, không bao giờ bị cắt mất 2 bên hay trên dưới */
     .img-card {
       position: relative;
       border-radius: 12px;
       overflow: hidden;
       border: 2.5px solid var(--c-lemon-pale);
-      background: rgba(20, 12, 48, 0.5);
-      aspect-ratio: 4 / 3;
+      background: rgba(20, 12, 48, 0.45);
+      width: 100%;
+      height: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
 
@@ -538,15 +544,16 @@
     .img-card img,
     .img-card video {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      height: auto;
+      max-height: 680px;
+      object-fit: contain;
       transition: transform 0.25s ease;
       display: block;
       background: #19103b;
     }
 
     .img-card:hover img {
-      transform: scale(1.03);
+      transform: scale(1.02);
     }
 
     /* Giao diện lớp phủ khi bật tính năng "Chọn ảnh để siêu nén" */
@@ -877,7 +884,7 @@
       display: flex;
     }
 
-    /* Lightbox xem ảnh hoặc video phóng to */
+    /* ================= LIGHTBOX XEM ẢNH/VIDEO KÈM LƯỚT TRÁI/PHẢI TRONG CÙNG 1 NHÓM ================= */
     .lightbox-modal {
       position: fixed;
       inset: 0;
@@ -887,6 +894,8 @@
       align-items: center;
       justify-content: center;
       padding: 16px;
+      touch-action: pan-y;
+      user-select: none;
     }
 
     .lightbox-modal.active {
@@ -895,29 +904,86 @@
 
     .lightbox-modal img,
     .lightbox-modal video {
-      max-width: 94%;
-      max-height: 86vh;
+      max-width: 88%;
+      max-height: 82vh;
       border: 3.5px solid var(--c-lemon-pale);
       border-radius: 16px;
       background: #120b29;
       object-fit: contain;
+      transition: opacity 0.18s ease;
     }
 
     .lightbox-close-btn {
       position: absolute;
       top: 16px;
       right: 16px;
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
-      background: rgba(235, 64, 52, 0.9);
+      background: rgba(235, 64, 52, 0.92);
       color: #fff;
-      border: 2px solid var(--c-lemon-pale);
-      font-size: 1.2rem;
+      border: 2.5px solid var(--c-lemon-pale);
+      font-size: 1.25rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 210;
+      z-index: 215;
+    }
+
+    /* Nút Lướt Trái / Phải khi xem nhóm có nhiều ảnh */
+    .lightbox-nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(244, 173, 207, 0.92), rgba(162, 146, 248, 0.92));
+      color: #23194f;
+      border: 2.5px solid var(--c-lemon-pale);
+      font-size: 1.25rem;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 215;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    .lightbox-nav-btn:hover {
+      transform: translateY(-50%) scale(1.08);
+      filter: brightness(1.08);
+    }
+
+    .lightbox-nav-btn:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+
+    .lightbox-nav-btn.prev {
+      left: 16px;
+    }
+
+    .lightbox-nav-btn.next {
+      right: 16px;
+    }
+
+    .lightbox-counter {
+      position: absolute;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(26, 17, 62, 0.9);
+      border: 2px solid var(--c-lemon-pale);
+      color: var(--c-lemon-pale);
+      padding: 5px 16px;
+      border-radius: 999px;
+      font-family: var(--font-heading);
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      display: none;
+      z-index: 215;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
     }
 
     @media (max-width: 520px) {
@@ -936,6 +1002,22 @@
         width: 54px;
         height: 54px;
         font-size: 1.4rem;
+      }
+      .lightbox-modal img,
+      .lightbox-modal video {
+        max-width: 96%;
+        max-height: 78vh;
+      }
+      .lightbox-nav-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.05rem;
+      }
+      .lightbox-nav-btn.prev {
+        left: 8px;
+      }
+      .lightbox-nav-btn.next {
+        right: 8px;
       }
     }
   </style>
@@ -1370,11 +1452,14 @@
     </div>
   </main>
 
-  <!-- Lightbox phóng to ảnh hoặc video -->
+  <!-- Lightbox phóng to ảnh/video kèm nút Lướt Trái/Phải và hỗ trợ vuốt tay trên điện thoại -->
   <div class="lightbox-modal" id="lightboxModal" onclick="closeLightbox(event)">
     <button class="lightbox-close-btn" onclick="closeLightbox(null)" title="Đóng"><i class="fa-solid fa-xmark"></i></button>
-    <img id="lightboxImg" src="" alt="Preview" decoding="async" style="display:none;">
-    <video id="lightboxVideo" src="" controls="" playsinline="" webkit-playsinline="" preload="metadata" style="display:none;"></video>
+    <button class="lightbox-nav-btn prev" id="lightboxPrevBtn" onclick="navigateLightbox(-1, event)" title="Ảnh trước" style="display: flex;"><i class="fa-solid fa-chevron-left"></i></button>
+    <img id="lightboxImg" alt="Preview" decoding="async" style="display: block;">
+    <video id="lightboxVideo" controls="" playsinline="" webkit-playsinline="" preload="metadata" style="display:none;"></video>
+    <button class="lightbox-nav-btn next" id="lightboxNextBtn" onclick="navigateLightbox(1, event)" title="Ảnh tiếp theo" style="display: flex;"><i class="fa-solid fa-chevron-right"></i></button>
+    <div class="lightbox-counter" id="lightboxCounter" style="display: block;">2 / 2</div>
   </div>
 
   <!-- ================= CÁC PHẦN DÀNH RIÊNG CHO CHỦ WEB (TỰ ĐỘNG XÓA SẠCH KHI XUẤT BẢN GITHUB) ================= -->
@@ -1387,11 +1472,15 @@
   <!-- THANH CÔNG CỤ CHỦ WEB KÈM DÒNG "✨Chế độ chủ web✨" VÀ 5 NÚT TÍNH NĂNG -->
   
 
-  <!-- Script dành cho khách xem (Phân nhánh: Điện thoại hiện pop-up View/Download mặc định, PC mở tab mới xem trực tiếp không đòi tải) -->
+  <!-- Script dành cho khách xem (Hỗ trợ lướt Trái/Phải trong cùng 1 nhóm ảnh + Giữ nguyên xuống dòng + Phân nhánh Mobile/PC) -->
   <script id="viewerScript">
     let activeBlobUrl = null;
+    let currentGroupMediaList = [];
+    let currentGroupIndex = 0;
+    let touchStartX = 0;
+    let touchStartY = 0;
 
-    // HÀM ĐỌC VĂN BẢN GIỮ NGUYÊN 100% DẤU XUỐNG DÒNG (KỂ CẢ KHI TAB ĐANG ẨN DISPLAY:NONE HOẶC TRONG CLONENODE)
+    // HÀM ĐỌC VĂN BẢN GIỮ NGUYÊN 100% DẤU XUỐNG DÒNG
     function extractTextPreservingLineBreaks(el) {
       if (!el) return "";
       const clone = el.cloneNode(true);
@@ -1441,12 +1530,11 @@
     }
 
     // HÀM XỬ LÝ KHI BẤM NÚT [Xem]:
-    // - Trên Điện thoại: Giữ nguyên hành vi mặc định của trình duyệt (hiện pop-up View/Download của trình duyệt)
+    // - Trên Điện thoại: Giữ nguyên hành vi mặc định của trình duyệt (hiện pop-up View/Download)
     // - Trên PC: Nhảy sang tab mới để phát video trực tiếp, không bắt tải về
     function handleSmartViewClick(event, anchorEl) {
       event.stopPropagation();
 
-      // Kiểm tra nếu là thiết bị di động (Điện thoại / iPad) -> Mở link gốc mặc định để trình duyệt hiện pop-up View/Download như code cũ
       const isMobileDevice =
         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
         (navigator.maxTouchPoints && navigator.maxTouchPoints > 1 && /Macintosh/i.test(navigator.userAgent));
@@ -1455,7 +1543,6 @@
         return true;
       }
 
-      // Nếu là máy tính (PC / Laptop) -> Áp dụng cơ chế mở tab mới xem trực tiếp không đòi tải về
       const rawUrl = anchorEl.getAttribute("data-raw-url") || anchorEl.getAttribute("href") || "";
       if (!rawUrl) return true;
 
@@ -1534,7 +1621,6 @@
       return true;
     }
 
-    // HÀM TỰ ĐỘNG THU GỌN MỌI ĐƯỜNG LINK DÀI TRONG MÔ TẢ THÀNH NÚT [Xem] VÀ BẢO TOÀN 100% XUỐNG DÒNG (<br>)
     function linkifyAllDescriptions(rootEl = document) {
       cleanUnwantedTelPrefixes(rootEl);
 
@@ -1669,6 +1755,7 @@
 
     window.addEventListener("DOMContentLoaded", () => {
       resetPanelsDefaultState(document);
+      setupLightboxSwipeAndKeyboard();
     });
 
     function toggleSection(panelId, btnElement) {
@@ -1710,20 +1797,89 @@
       return rawSrc;
     }
 
+    // THU THẬP DANH SÁCH ẢNH/VIDEO TRONG CÙNG 1 NHÓM ĐỂ NGƯỜI XEM LƯỚT TRÁI/PHẢI
+    function collectGroupMediaFromCard(clickedCard) {
+      const group = clickedCard ? clickedCard.closest(".product-group") : null;
+      if (!group) return { list: [], index: 0 };
+
+      const cards = Array.from(group.querySelectorAll(".img-card"));
+      const list = [];
+      let activeIdx = 0;
+
+      cards.forEach((card) => {
+        const vid = card.querySelector("video");
+        const img = card.querySelector("img");
+        if (vid) {
+          const src = vid.getAttribute("src") || vid.getAttribute("data-lazy-src") || vid.src;
+          if (src) {
+            if (card === clickedCard) activeIdx = list.length;
+            list.push({ src, isVideo: true });
+          }
+        } else if (img) {
+          const src = img.getAttribute("src") || img.getAttribute("data-lazy-src") || img.src;
+          if (src) {
+            if (card === clickedCard) activeIdx = list.length;
+            list.push({ src, isVideo: false });
+          }
+        }
+      });
+
+      return { list, index: activeIdx };
+    }
+
     function openLightboxFromElement(imgElement) {
       if (!imgElement) return;
-      const src = imgElement.getAttribute("src") || imgElement.getAttribute("data-lazy-src") || imgElement.src;
-      openLightbox(src, false);
+      const card = imgElement.closest(".img-card");
+      const { list, index } = collectGroupMediaFromCard(card);
+      if (list.length > 0) {
+        currentGroupMediaList = list;
+        currentGroupIndex = index;
+        renderCurrentGroupLightboxItem();
+      } else {
+        const src = imgElement.getAttribute("src") || imgElement.getAttribute("data-lazy-src") || imgElement.src;
+        currentGroupMediaList = [{ src, isVideo: false }];
+        currentGroupIndex = 0;
+        renderCurrentGroupLightboxItem();
+      }
     }
 
     function openLightboxFromVideoBtn(btnElement) {
       const card = btnElement.closest(".img-card");
       if (!card) return;
       const vid = card.querySelector("video");
-      if (vid) {
-        vid.pause();
-        const src = vid.getAttribute("src") || vid.getAttribute("data-lazy-src") || vid.src;
-        openLightbox(src, true);
+      if (vid) vid.pause();
+      const { list, index } = collectGroupMediaFromCard(card);
+      if (list.length > 0) {
+        currentGroupMediaList = list;
+        currentGroupIndex = index;
+        renderCurrentGroupLightboxItem();
+      }
+    }
+
+    // Chuyển qua lại giữa các ảnh/video trong cùng 1 nhóm
+    function navigateLightbox(step, event) {
+      if (event) event.stopPropagation();
+      if (!currentGroupMediaList || currentGroupMediaList.length <= 1) return;
+      currentGroupIndex = (currentGroupIndex + step + currentGroupMediaList.length) % currentGroupMediaList.length;
+      renderCurrentGroupLightboxItem();
+    }
+
+    function renderCurrentGroupLightboxItem() {
+      const item = currentGroupMediaList[currentGroupIndex];
+      if (!item) return;
+
+      openLightbox(item.src, item.isVideo);
+
+      const prevBtn = document.getElementById("lightboxPrevBtn");
+      const nextBtn = document.getElementById("lightboxNextBtn");
+      const counter = document.getElementById("lightboxCounter");
+      const hasMultiple = currentGroupMediaList.length > 1;
+
+      if (prevBtn) prevBtn.style.display = hasMultiple ? "flex" : "none";
+      if (nextBtn) nextBtn.style.display = hasMultiple ? "flex" : "none";
+      if (counter) {
+        counter.style.display = hasMultiple ? "block" : "none";
+        counter.textContent = `${currentGroupIndex + 1} / ${currentGroupMediaList.length}`;
       }
     }
 
@@ -1755,7 +1911,15 @@
     }
 
     function closeLightbox(event) {
-      if (event && (event.target.tagName === "VIDEO" || event.target.tagName === "IMG")) return;
+      if (
+        event &&
+        (event.target.tagName === "VIDEO" ||
+          event.target.tagName === "IMG" ||
+          event.target.closest(".lightbox-nav-btn") ||
+          event.target.closest(".lightbox-counter"))
+      ) {
+        return;
+      }
       const modal = document.getElementById("lightboxModal");
       const imgEl = document.getElementById("lightboxImg");
       const videoEl = document.getElementById("lightboxVideo");
@@ -1772,6 +1936,53 @@
 
       modal.classList.remove("active");
       document.body.classList.remove("lightbox-open");
+    }
+
+    // Hỗ trợ vuốt ngón tay Trái/Phải trên Điện thoại & bấm phím Mũi tên Trái/Phải trên PC
+    function setupLightboxSwipeAndKeyboard() {
+      const modal = document.getElementById("lightboxModal");
+      if (!modal) return;
+
+      modal.addEventListener(
+        "touchstart",
+        (e) => {
+          if (e.touches.length === 1) {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+          }
+        },
+        { passive: true }
+      );
+
+      modal.addEventListener(
+        "touchend",
+        (e) => {
+          if (!modal.classList.contains("active") || currentGroupMediaList.length <= 1) return;
+          if (e.changedTouches.length === 1) {
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            const dy = e.changedTouches[0].clientY - touchStartY;
+            if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) {
+              if (dx < 0) {
+                navigateLightbox(1, null); // Vuốt sang trái -> Xem ảnh tiếp theo
+              } else {
+                navigateLightbox(-1, null); // Vuốt sang phải -> Xem ảnh trước đó
+              }
+            }
+          }
+        },
+        { passive: true }
+      );
+
+      window.addEventListener("keydown", (e) => {
+        if (!modal.classList.contains("active")) return;
+        if (e.key === "ArrowRight") {
+          navigateLightbox(1, null);
+        } else if (e.key === "ArrowLeft") {
+          navigateLightbox(-1, null);
+        } else if (e.key === "Escape") {
+          closeLightbox(null);
+        }
+      });
     }
   </script>
 
